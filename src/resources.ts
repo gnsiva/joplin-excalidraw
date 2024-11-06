@@ -1,7 +1,7 @@
 import joplin from 'api'
 import { v4 as uuidv4 } from 'uuid'
 import { tmpdir } from 'os'
-import { sep } from 'path'
+import { sep, dirname, join } from 'path'
 const fs = joplin.require('fs-extra')
 
 const Config = {
@@ -30,9 +30,13 @@ export function clearDiskCache(): void {
 
 async function writeJsonFile(name: string, data: string, filePath: string = null): Promise<string> {
     if (!filePath) {
-        filePath = `${Config.TempFolder}${name}.json`
+        filePath = join(Config.TempFolder, `${name}.json`)
     }
     filePath += buildTitle(data)
+
+    // Ensure the directory exists
+    await fs.mkdir(dirname(filePath), { recursive: true })
+
     await fs.writeFile(filePath, data)
     return filePath
 }
